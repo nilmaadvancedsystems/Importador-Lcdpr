@@ -67,6 +67,10 @@ table.t tbody tr.revisar{background:var(--warn-soft)}
 .tag-nf{background:rgba(178,58,68,.18);color:#e6a2a8}
 .tag-cte{background:rgba(150,150,150,.2);color:#cfcfcf}
 .tag-warn{background:var(--warn-soft);color:var(--warn)}
+.tag-ncm{background:rgba(93,168,120,.18);color:#8fd6a8}
+.tag-palavra{background:var(--accent-soft);color:#e6a2a8}
+.tag-manual{background:rgba(120,150,200,.18);color:#a8c0e6}
+.tag-neutro{background:rgba(255,255,255,.08);color:var(--muted)}
 .small{font-size:11.5px;color:var(--muted)}
 .mono{font-family:ui-monospace,Consolas,monospace}
 .hint{color:var(--muted);font-size:13px;max-width:74ch;margin:0 0 12px}
@@ -205,12 +209,27 @@ function defaultState(){
       f('DILTON ALVES PEREIRA FILHO','12421505000109','805','91011',TEMPLATES.fretes)
     ],
     ncmRules: [
-      {prefixo:'2710', conta:'924', codHist:'00061', historico:TEMPLATES.combustiveis}
+      // Combustíveis — cap. 27.10 cobre óleo diesel, gasolina etc. (todas as variações vistas)
+      {prefixo:'2710', conta:'924', codHist:'00061', historico:TEMPLATES.combustiveis},
+      {prefixo:'3811', conta:'924', codHist:'00061', historico:TEMPLATES.combustiveis}, // aditivos p/ combustível (ex: ARLA)
+      // Peças/manutenção de máquinas — parafusos/porcas, rolamentos, vedações, ferro fundido
+      {prefixo:'7318', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8482', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'4016', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'7325', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      // Insumos para animais — ração/suplemento, medicamento e vacina veterinária
+      {prefixo:'2309', conta:'85', codHist:'00563', historico:TEMPLATES.insumosAnimais},
+      {prefixo:'3002', conta:'85', codHist:'00563', historico:TEMPLATES.insumosAnimais},
+      {prefixo:'3004', conta:'85', codHist:'00563', historico:TEMPLATES.insumosAnimais},
+      // Material de construção/instalações — material elétrico, ferragens, cadeados
+      {prefixo:'8536', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao},
+      {prefixo:'8301', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}
     ],
     produtoRules: [
-      {palavras:'OLEO DIESEL, GASOLINA, ETANOL, COMBUSTIVEL, ARLA', conta:'924', codHist:'00061', historico:TEMPLATES.combustiveis},
+      {palavras:'OLEO DIESEL, GASOLINA, ETANOL, COMBUSTIVEL, ARLA, LUBRAX, LUBRIFICANTE', conta:'924', codHist:'00061', historico:TEMPLATES.combustiveis},
       {palavras:'ADUBO, FERTILIZANTE, DEFENSIVO, SEMENTE, HERBICIDA, INSETICIDA, FUNGICIDA', conta:'722', codHist:'96337', historico:TEMPLATES.adubos},
-      {palavras:'RACAO, NUTRICAO ANIMAL, SUPLEMENTO MINERAL, SAL MINERAL, BIMECTIN', conta:'85', codHist:'00563', historico:TEMPLATES.insumosAnimais}
+      {palavras:'RACAO, NUTRICAO ANIMAL, SUPLEMENTO MINERAL, SAL MINERAL, BIMECTIN, VACINA', conta:'85', codHist:'00563', historico:TEMPLATES.insumosAnimais},
+      {palavras:'PARAFUSO, PORCA, ROLAMENTO, MANGUEIRA, FILTRO, CORREIA, RETENTOR, TERMINAL, REFORCO', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}
     ],
     imoveis: [
       {codigo:'001', descricao:'Imóvel 001'},
@@ -308,33 +327,49 @@ function toast(msg){
 let uid = 1;
 
 /* ============================== CLASSIFICAÇÃO ============================== */
+function escapeRegex(s){ return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 function classifyNF(doc){
+  // NCM: um documento pode misturar itens de categorias diferentes (ex: nota de
+  // combustível com um filtro de brinde). Em vez de decidir pela primeira linha
+  // que bater uma regra, somamos o valor das linhas por regra e escolhemos a
+  // regra cujo total responde pela maior parte do valor da nota — assim o item
+  // principal manda, não o primeiro da lista.
+  const totals = new Map(); // key: índice da regra -> {rule, total}
   for(const line of doc.linhas){
     const ncmStr = String(line.ncm||'').trim();
     if(!ncmStr) continue;
-    for(const rule of state.ncmRules){
+    for(let i=0;i<state.ncmRules.length;i++){
+      const rule = state.ncmRules[i];
       const pref = String(rule.prefixo||'').trim();
-      if(pref && ncmStr.startsWith(pref)) return {conta:rule.conta, codHist:rule.codHist, historico:rule.historico, origemRegra:'NCM'};
+      if(pref && ncmStr.startsWith(pref)){
+        const acc = totals.get(i) || {rule, total:0};
+        acc.total += Number(line.valor)||0;
+        totals.set(i, acc);
+        break; // essa linha já achou sua regra, não avalia as demais pra ela
+      }
     }
+  }
+  if(totals.size){
+    let best = null;
+    for(const acc of totals.values()){ if(!best || acc.total>best.total) best = acc; }
+    return {conta:best.rule.conta, codHist:best.rule.codHist, historico:best.rule.historico, origemRegra:'NCM'};
   }
   const text = doc.produtoJoined.toUpperCase();
   for(const rule of state.produtoRules){
     const keys = String(rule.palavras||'').split(',').map(s=>s.trim().toUpperCase()).filter(Boolean);
-    if(keys.some(k=>k && text.includes(k))) return {conta:rule.conta, codHist:rule.codHist, historico:rule.historico, origemRegra:'Produto'};
+    if(keys.some(k=>k && new RegExp('(^|[^A-ZÀ-Ú0-9])'+escapeRegex(k)+'([^A-ZÀ-Ú0-9]|$)').test(text)))
+      return {conta:rule.conta, codHist:rule.codHist, historico:rule.historico, origemRegra:'Produto'};
   }
-  const cnpjDigits = onlyDigits(doc.cnpj);
-  if(cnpjDigits){
-    const frule = state.fornecedores.find(fr=>onlyDigits(fr.cnpj)===cnpjDigits);
-    if(frule) return {conta:frule.conta, codHist:frule.codHist, historico:frule.historico, origemRegra:'Fornecedor'};
-  }
+  // Regra por fornecedor NÃO classifica sozinha: um mesmo fornecedor pode vender
+  // itens de categorias diferentes (ex: posto que vende combustível e também peças).
+  // Sem NCM/palavra-chave batendo, o lançamento vai pra REVISAR mesmo que exista
+  // uma regra de fornecedor cadastrada.
   return null;
 }
 function classifyCTe(doc){
-  const cnpjDigits = onlyDigits(doc.cnpj);
-  if(cnpjDigits){
-    const frule = state.fornecedores.find(fr=>onlyDigits(fr.cnpj)===cnpjDigits);
-    if(frule) return {conta:frule.conta, codHist:frule.codHist, historico:frule.historico, origemRegra:'Fornecedor'};
-  }
+  // CT-e não carrega NCM/produto confiável — mas ao contrário de uma nota de compra,
+  // o serviço prestado é sempre frete, então a categoria padrão configurada é segura
+  // independente da transportadora.
   const cat = state.categorias.find(c=>c.nome===state.config.categoriaFretesCTe);
   if(cat) return {conta:cat.conta, codHist:cat.codHist, historico:cat.historico, origemRegra:'Padrão CT-e'};
   return null;
@@ -362,7 +397,8 @@ function buildLancamentoFromDoc(doc, origem){
     tipoDoc: state.config.tipoDocPadrao,
     tipoLanc: state.config.tipoLancPadrao,
     produto: doc.produtoJoined || '',
-    revisar: !match
+    revisar: !match,
+    origemRegra: match ? match.origemRegra : 'Nenhuma'
   };
   if(match) row.categoria = findCategoriaLabel(match.conta, match.codHist);
   return row;
@@ -423,7 +459,7 @@ function importDetalhamento(rows){
     const g = groups[key];
     const prod = String(r.Produto||'').trim();
     if(prod) g.produtos.push(prod);
-    g.linhas.push({ncm:r.NCM});
+    g.linhas.push({ncm:r.NCM, valor:Number(r.Valor_Produto)||0});
   }
   let count=0;
   for(const key in groups){
@@ -569,24 +605,34 @@ function screenImportar(){
     <div class="tablewrap">
       <table class="t">
         <thead><tr>
-          <th></th><th>Origem</th><th style="min-width:190px">Categoria rápida</th><th>Data</th><th>Documento</th>
+          <th></th><th>Origem</th><th style="width:100px">Regra</th><th style="min-width:190px">Categoria rápida</th><th>Data</th><th>Documento</th>
           <th>CPF/CNPJ</th><th>Conta Deved.</th><th>Conta Cred.</th><th>Cód. Hist.</th>
           <th style="min-width:300px">Histórico</th><th>Valor</th><th>Imóvel</th><th>Tipo Doc.</th><th style="min-width:220px">Produto</th>
         </tr></thead>
         <tbody>
-        ${list.length? list.map(r=>rowHtml(r)).join('') : `<tr><td colspan="14" style="text-align:center;color:var(--muted);padding:24px">Nenhum lançamento ainda. Importe um relatório acima.</td></tr>`}
+        ${list.length? list.map(r=>rowHtml(r)).join('') : `<tr><td colspan="15" style="text-align:center;color:var(--muted);padding:24px">Nenhum lançamento ainda. Importe um relatório acima.</td></tr>`}
         </tbody>
       </table>
     </div>
   </section>`;
 }
+const ORIGEM_TAG = {
+  'NCM': {cls:'tag-ncm', label:'NCM'},
+  'Produto': {cls:'tag-palavra', label:'palavra-chave'},
+  'Padrão CT-e': {cls:'tag-neutro', label:'padrão CT-e'},
+  'Manual': {cls:'tag-manual', label:'manual'},
+  'Nenhuma': null
+};
 function rowHtml(r){
   const catOptions = ['<option value="">'+(r.categoria?'— sem categoria —':'— nenhuma —')+'</option>'].concat(
     state.categorias.map(c=>`<option value="${esc(c.nome)}" ${c.nome===r.categoria?'selected':''}>${esc(c.nome)}</option>`)
   ).join('');
+  const ot = ORIGEM_TAG[r.origemRegra];
+  const origemTagHtml = ot ? `<span class="tag ${ot.cls}" title="Classificado por: ${ot.label}">${ot.label}</span>` : '';
   return `<tr class="${r.revisar?'revisar':''}" data-row="${r.id}">
     <td style="text-align:center"><input type="checkbox" data-sel="${r.id}" ${r.selected?'checked':''}></td>
     <td><span class="tag ${r.origem==='NF'?'tag-nf':'tag-cte'}">${r.origem}</span>${r.revisar?' <span class="tag tag-warn">REVISAR</span>':''}</td>
+    <td>${origemTagHtml}</td>
     <td><select data-catsel="${r.id}">${catOptions}</select></td>
     <td class="mono small" style="white-space:nowrap">${fmtDateBR(r.data)}</td>
     <td style="white-space:nowrap"><input class="tbl-input" data-field="documento" data-id="${r.id}" value="${esc(r.documento)}"></td>
@@ -610,6 +656,7 @@ function applyCategoriaToRow(row, catNome){
     row.codHist = cat.codHist||'';
     row.historico = applyTemplate(cat.historico, {documento:row.documento, fornecedor:row.fornecedor, cnpj:row.cnpj});
     row.revisar = false;
+    row.origemRegra = 'Manual';
   }
 }
 
@@ -667,8 +714,8 @@ function screenRegras(){
 
     <div class="section-sep"></div>
 
-    <h2>Regras por fornecedor</h2>
-    <p class="hint"><strong>Usada por último</strong> — só entra quando o NCM e a palavra-chave do produto não resolveram nada. Identificado pelo CPF/CNPJ do emitente (só números).</p>
+    <h2>Regras por fornecedor <span class="tag" style="background:rgba(255,255,255,.08);color:var(--muted);margin-left:6px">não usada na classificação automática de compras</span></h2>
+    <p class="hint">Mantida só como cadastro de referência — o mesmo fornecedor pode vender itens de categorias diferentes (ex: posto que vende combustível e também peças), então ela <strong>não</strong> classifica notas de compra sozinha. Quem decide é o NCM e a palavra-chave do produto; sem nenhum dos dois batendo, a nota vai pra REVISAR mesmo que o fornecedor esteja cadastrado aqui.</p>
     <div class="toolbar"><span style="flex:1"></span><button class="btn btn-primary" data-add="fornecedores">+ Novo fornecedor</button></div>
     <div class="tablewrap" style="margin-bottom:36px"><table class="t">
       <thead><tr><th style="width:220px">Fornecedor</th><th style="width:150px">CNPJ/CPF (números)</th><th style="width:90px">Conta</th><th style="width:90px">Cód. Hist.</th><th>Texto do histórico</th><th style="width:40px"></th></tr></thead>
