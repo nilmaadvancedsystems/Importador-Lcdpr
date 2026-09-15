@@ -88,6 +88,17 @@ table.t tbody tr.revisar{background:var(--warn-soft)}
 .tbl-input:focus{background:var(--surface-2);border-color:var(--accent)}
 .toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--divider);color:var(--text);padding:11px 16px;border-radius:var(--radius-sm);font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:999;max-width:360px}
 .badge-count{background:var(--accent);color:#fff;font-size:10px;border-radius:8px;padding:1px 6px;margin-left:6px}
+.truncate{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.chev{width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;background:none;border:none;color:var(--muted);transition:transform .12s}
+.chev:hover{background:rgba(255,255,255,.06);color:var(--text)}
+.chev.open{transform:rotate(90deg)}
+tr.row-detail td{background:var(--surface-2);padding:16px 18px;border-bottom:1px solid var(--divider)}
+tr.row-detail-hidden{display:none}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:12px}
+.detail-field label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.detail-field input,.detail-field textarea{width:100%}
+textarea.tbl-input{resize:vertical;min-height:38px;font-family:inherit}
+.status-cell{display:flex;flex-direction:column;gap:3px;align-items:flex-start}
 </style>
 </head>
 <body>
@@ -247,7 +258,7 @@ function defaultState(){
       {codigo:'3', descricao:'Adiantamento'}
     ],
     lancamentos: [],
-    ui: { search:'', showOnlyRevisar:false, bulkCategoria:'' }
+    ui: { search:'', showOnlyRevisar:false, bulkCategoria:'', expandedId:null }
   };
 }
 function f(nome,cnpj,conta,codHist,historico){ return {nome,cnpj,conta,codHist,historico}; }
@@ -602,15 +613,15 @@ function screenImportar(){
       <label class="small" style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="selectAllVisible"> selecionar visíveis</label>
     </div>
 
+    <p class="small" style="margin-bottom:10px">Clique na seta ▸ de uma linha pra ver/editar conta, código histórico, imóvel e o texto completo do histórico.</p>
     <div class="tablewrap">
       <table class="t">
         <thead><tr>
-          <th></th><th>Origem</th><th style="width:100px">Regra</th><th style="min-width:190px">Categoria rápida</th><th>Data</th><th>Documento</th>
-          <th>CPF/CNPJ</th><th>Conta Deved.</th><th>Conta Cred.</th><th>Cód. Hist.</th>
-          <th style="min-width:300px">Histórico</th><th>Valor</th><th>Imóvel</th><th>Tipo Doc.</th><th style="min-width:220px">Produto</th>
+          <th></th><th style="width:110px">Status</th><th style="min-width:200px">Categoria rápida</th><th>Data</th>
+          <th style="min-width:170px">Fornecedor</th><th>Documento</th><th>Valor</th><th style="width:34px"></th>
         </tr></thead>
         <tbody>
-        ${list.length? list.map(r=>rowHtml(r)).join('') : `<tr><td colspan="15" style="text-align:center;color:var(--muted);padding:24px">Nenhum lançamento ainda. Importe um relatório acima.</td></tr>`}
+        ${list.length? list.map(r=>rowHtml(r)).join('') : `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Nenhum lançamento ainda. Importe um relatório acima.</td></tr>`}
         </tbody>
       </table>
     </div>
@@ -629,23 +640,34 @@ function rowHtml(r){
   ).join('');
   const ot = ORIGEM_TAG[r.origemRegra];
   const origemTagHtml = ot ? `<span class="tag ${ot.cls}" title="Classificado por: ${ot.label}">${ot.label}</span>` : '';
-  return `<tr class="${r.revisar?'revisar':''}" data-row="${r.id}">
+  const open = state.ui.expandedId===r.id;
+  const compact = `<tr class="${r.revisar?'revisar':''}" data-row="${r.id}">
     <td style="text-align:center"><input type="checkbox" data-sel="${r.id}" ${r.selected?'checked':''}></td>
-    <td><span class="tag ${r.origem==='NF'?'tag-nf':'tag-cte'}">${r.origem}</span>${r.revisar?' <span class="tag tag-warn">REVISAR</span>':''}</td>
-    <td>${origemTagHtml}</td>
+    <td><div class="status-cell"><span class="tag ${r.origem==='NF'?'tag-nf':'tag-cte'}">${r.origem}</span>${r.revisar?'<span class="tag tag-warn">REVISAR</span>':origemTagHtml}</div></td>
     <td><select data-catsel="${r.id}">${catOptions}</select></td>
     <td class="mono small" style="white-space:nowrap">${fmtDateBR(r.data)}</td>
-    <td style="white-space:nowrap"><input class="tbl-input" data-field="documento" data-id="${r.id}" value="${esc(r.documento)}"></td>
-    <td class="mono small"><input class="tbl-input mono" data-field="cnpj" data-id="${r.id}" value="${esc(r.cnpj)}"></td>
-    <td><input class="tbl-input" data-field="contaDeved" data-id="${r.id}" value="${esc(r.contaDeved)}" style="width:70px"></td>
-    <td><input class="tbl-input" data-field="contaCred" data-id="${r.id}" value="${esc(r.contaCred)}" style="width:60px"></td>
-    <td><input class="tbl-input" data-field="codHist" data-id="${r.id}" value="${esc(r.codHist)}" style="width:70px"></td>
-    <td style="min-width:300px"><input class="tbl-input" data-field="historico" data-id="${r.id}" value="${esc(r.historico)}" style="width:100%"></td>
-    <td style="text-align:right;white-space:nowrap"><input class="tbl-input" data-field="valor" data-id="${r.id}" value="${fmtMoney(r.valor)}" style="width:90px;text-align:right"></td>
-    <td><input class="tbl-input" data-field="imovel" data-id="${r.id}" value="${esc(r.imovel)}" style="width:56px"></td>
-    <td><input class="tbl-input" data-field="tipoDoc" data-id="${r.id}" value="${esc(r.tipoDoc)}" style="width:50px"></td>
-    <td style="min-width:220px" class="small">${esc(r.produto)}</td>
+    <td><span class="truncate" title="${esc(r.fornecedor)}">${esc(r.fornecedor)}</span></td>
+    <td style="white-space:nowrap">${esc(r.documento)}</td>
+    <td style="text-align:right;white-space:nowrap" class="mono">${fmtMoney(r.valor)}</td>
+    <td style="text-align:center"><button class="chev${open?' open':''}" data-expand="${r.id}" title="Ver/editar detalhes">▸</button></td>
   </tr>`;
+  if(!open) return compact;
+  const detail = `<tr class="row-detail" data-row-detail="${r.id}"><td colspan="8">
+    <div class="detail-grid">
+      <div class="detail-field"><label>Conta devedora</label><input class="tbl-input" data-field="contaDeved" data-id="${r.id}" value="${esc(r.contaDeved)}"></div>
+      <div class="detail-field"><label>Conta credora</label><input class="tbl-input" data-field="contaCred" data-id="${r.id}" value="${esc(r.contaCred)}"></div>
+      <div class="detail-field"><label>Cód. histórico</label><input class="tbl-input" data-field="codHist" data-id="${r.id}" value="${esc(r.codHist)}"></div>
+      <div class="detail-field"><label>Imóvel</label><input class="tbl-input" data-field="imovel" data-id="${r.id}" value="${esc(r.imovel)}"></div>
+      <div class="detail-field"><label>Tipo doc.</label><input class="tbl-input" data-field="tipoDoc" data-id="${r.id}" value="${esc(r.tipoDoc)}"></div>
+      <div class="detail-field"><label>Tipo lançamento</label><input class="tbl-input" data-field="tipoLanc" data-id="${r.id}" value="${esc(r.tipoLanc)}"></div>
+      <div class="detail-field"><label>CPF/CNPJ</label><input class="tbl-input mono" data-field="cnpj" data-id="${r.id}" value="${esc(r.cnpj)}"></div>
+      <div class="detail-field"><label>Documento</label><input class="tbl-input" data-field="documento" data-id="${r.id}" value="${esc(r.documento)}"></div>
+      <div class="detail-field"><label>Valor</label><input class="tbl-input" data-field="valor" data-id="${r.id}" value="${fmtMoney(r.valor)}"></div>
+    </div>
+    <div class="detail-field" style="margin-bottom:12px"><label>Histórico</label><textarea class="tbl-input" data-field="historico" data-id="${r.id}" rows="2">${esc(r.historico)}</textarea></div>
+    <div class="detail-field"><label>Produto(s)</label><textarea class="tbl-input" data-field="produto" data-id="${r.id}" rows="2">${esc(r.produto)}</textarea></div>
+  </td></tr>`;
+  return compact + detail;
 }
 function findLanc(id){ return state.lancamentos.find(r=>r.id===Number(id)); }
 function applyCategoriaToRow(row, catNome){
@@ -867,6 +889,11 @@ function wireScreen(){
   document.querySelectorAll('[data-catsel]').forEach(sel=>sel.addEventListener('change', ()=>{
     const row = findLanc(sel.dataset.catsel);
     if(row){ applyCategoriaToRow(row, sel.value); save(); render(); }
+  }));
+  document.querySelectorAll('[data-expand]').forEach(btn=>btn.addEventListener('click', ()=>{
+    const id = Number(btn.dataset.expand);
+    state.ui.expandedId = (state.ui.expandedId===id) ? null : id;
+    render();
   }));
   document.querySelectorAll('[data-field]').forEach(inp=>inp.addEventListener('change', ()=>{
     const row = findLanc(inp.dataset.id);
