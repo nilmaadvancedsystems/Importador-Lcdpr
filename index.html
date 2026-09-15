@@ -190,57 +190,134 @@ function defaultState(){
       {codigo:'224', nome:'Venda de Café', classificacao:'Receita', tipo:'A'},
       {codigo:'238', nome:'Venda de Bovinos', classificacao:'Receita', tipo:'A'}
     ],
-    fornecedores: [
-      f('COMPECAS LTDA','24359754000109','924','00061',TEMPLATES.combustiveis),
-      f('MERCOLUB LUBRIFICANTES LTDA','07468230000129','924','00061',TEMPLATES.combustiveis),
-      f('MERCOLUB PETROLEO LTDA','04799975000182','924','00061',TEMPLATES.combustiveis),
-      f('POSTO JANAUBA LTDA','71014658000109','924','00061',TEMPLATES.combustiveis),
-      f('POSTO JENIPAPO DE SALINAS LTDA','07876896000116','924','00061',TEMPLATES.combustiveis),
-      f('POSTO TRANSANIMAIS LTDA','26185153000144','924','00061',TEMPLATES.combustiveis),
-      f('REDE DOM PEDRO DE POSTOS LTDA','20415295006962','924','00061',TEMPLATES.combustiveis),
-      f('REDE FALCO COMBUSTIVEIS SAO FRANCISCO LTDA','26656706000108','924','00061',TEMPLATES.combustiveis),
-      f('ANTONIO MARON CHEQUER LTDA','19388198000150','924','00061',TEMPLATES.combustiveis),
-      f('COMERCIAL GALA LTDA','42985218001598','812','00044',TEMPLATES.usoConsumo),
-      f('SAYRO EQUIPAMENTOS DE SEGURANCA LTDA','00947030000100','812','00044',TEMPLATES.usoConsumo),
-      f('JOELFLOR PEREIRA DA ROCHA LTDA','17683269000112','812','00044',TEMPLATES.usoConsumo),
-      f('CONSTRUIR MATERIAIS DE CONSTRUCAO DE TAIOBEIRAS','11345512000106','847','00176',TEMPLATES.matConstrucao),
-      f('SERRALHERIA OURO VERDE LTDA','25542416000162','847','00176',TEMPLATES.matConstrucao),
-      f('DEUSDETE JOSE DOS SANTOS','01901756000174','784','00066',TEMPLATES.pecas),
-      f('TECNNOAR SERVICO E COMERCIO EIRELLI ME','15766730000175','784','00066',TEMPLATES.pecas),
-      f('RM TRATOR PECAS LTDA','39968260000190','784','00066',TEMPLATES.pecas),
-      f('MURANGA IND. COMERCIO E SERVICOS LTDA','10210180000190','784','00066',TEMPLATES.pecas),
-      f('TONINHO AUTO CENTER','28449462000100','784','00066',TEMPLATES.pecas),
-      f('DISOL PRODUTOS AGROPECUARIOS','21424452000170','85','00563',TEMPLATES.insumosAnimais),
-      f('GUABI NUTRICAO E SAUDE ANIMAL LTDA','02918654000558','85','00563',TEMPLATES.insumosAnimais),
-      f('SUPER SAFRA CONCESSIONARIA DE TRATORES LTDA','20604641000162','735','',TEMPLATES.maquinas),
-      f('PAULINERIS TRANSPORTES E ENCOMENDAS LTDA','42846634000290','805','91011',TEMPLATES.fretes),
-      f('MG FLORESTAL & TRANSPORTES LTDA','14598428000192','805','91011',TEMPLATES.fretes),
-      f('MENEGHETTI TRANSPORTES E LOGISTICA LTDA','17088302000166','805','91011',TEMPLATES.fretes),
-      f('DMC TRANSPORTES DE GADO LTDA','24651312000123','805','91011',TEMPLATES.fretes),
-      f('DILTON ALVES PEREIRA FILHO','12421505000109','805','91011',TEMPLATES.fretes)
-    ],
+    // Classificação de compras é feita SÓ por NCM (prefixo = capítulo/posição da
+    // Nomenclatura Comum do Mercosul). Cobre os NCMs reais observados nos produtos
+    // do cliente — vá completando conforme aparecerem NCMs novos em REVISAR.
     ncmRules: [
-      // Combustíveis — cap. 27.10 cobre óleo diesel, gasolina etc. (todas as variações vistas)
+      // Combustíveis e lubrificantes
       {prefixo:'2710', conta:'924', codHist:'00061', historico:TEMPLATES.combustiveis},
-      {prefixo:'3811', conta:'924', codHist:'00061', historico:TEMPLATES.combustiveis}, // aditivos p/ combustível (ex: ARLA)
-      // Peças/manutenção de máquinas — parafusos/porcas, rolamentos, vedações, ferro fundido
-      {prefixo:'7318', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
-      {prefixo:'8482', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
-      {prefixo:'4016', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
-      {prefixo:'7325', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
-      // Insumos para animais — ração/suplemento, medicamento e vacina veterinária
+      {prefixo:'2707', conta:'924', codHist:'00061', historico:TEMPLATES.combustiveis},
+      {prefixo:'3811', conta:'924', codHist:'00061', historico:TEMPLATES.combustiveis},
+      {prefixo:'3824', conta:'924', codHist:'00061', historico:TEMPLATES.combustiveis},
+      // Adubos, defensivos e fertilizantes
+      {prefixo:'3808', conta:'722', codHist:'96337', historico:TEMPLATES.adubos},
+      // Insumos para animais — ração/suplemento, medicamento/vacina veterinária, arreios
       {prefixo:'2309', conta:'85', codHist:'00563', historico:TEMPLATES.insumosAnimais},
       {prefixo:'3002', conta:'85', codHist:'00563', historico:TEMPLATES.insumosAnimais},
       {prefixo:'3004', conta:'85', codHist:'00563', historico:TEMPLATES.insumosAnimais},
-      // Material de construção/instalações — material elétrico, ferragens, cadeados
+      {prefixo:'4106', conta:'85', codHist:'00563', historico:TEMPLATES.insumosAnimais},
+      {prefixo:'4201', conta:'85', codHist:'00563', historico:TEMPLATES.insumosAnimais},
+      // Compra de bovinos
+      {prefixo:'0102', conta:'730', codHist:'', historico:TEMPLATES.bovinos},
+      // Máquinas e implementos agrícolas (a máquina inteira, não a peça)
+      {prefixo:'8701', conta:'735', codHist:'', historico:TEMPLATES.maquinas},
+      {prefixo:'8432', conta:'735', codHist:'', historico:TEMPLATES.maquinas},
+      {prefixo:'8430', conta:'735', codHist:'', historico:TEMPLATES.maquinas},
+      {prefixo:'8467', conta:'735', codHist:'', historico:TEMPLATES.maquinas},
+      // Peças / conservação e manutenção de máquinas e veículos
+      {prefixo:'7318', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'7325', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'7320', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'7315', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'7307', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8482', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8483', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8421', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8431', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8433', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8424', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8465', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8511', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8512', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8506', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8545', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8708', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8714', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'4008', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'4009', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'4010', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'4013', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'4016', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'8204', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      {prefixo:'5909', conta:'784', codHist:'00066', historico:TEMPLATES.pecas},
+      // Material de construção / conservação e manutenção de instalações
+      {prefixo:'2517', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao},
+      {prefixo:'2505', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao},
+      {prefixo:'6904', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao},
+      {prefixo:'4407', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao},
+      {prefixo:'7208', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao},
+      {prefixo:'8301', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao},
       {prefixo:'8536', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao},
-      {prefixo:'8301', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}
-    ],
-    produtoRules: [
-      {palavras:'OLEO DIESEL, GASOLINA, ETANOL, COMBUSTIVEL, ARLA, LUBRAX, LUBRIFICANTE', conta:'924', codHist:'00061', historico:TEMPLATES.combustiveis},
-      {palavras:'ADUBO, FERTILIZANTE, DEFENSIVO, SEMENTE, HERBICIDA, INSETICIDA, FUNGICIDA', conta:'722', codHist:'96337', historico:TEMPLATES.adubos},
-      {palavras:'RACAO, NUTRICAO ANIMAL, SUPLEMENTO MINERAL, SAL MINERAL, BIMECTIN, VACINA', conta:'85', codHist:'00563', historico:TEMPLATES.insumosAnimais},
-      {palavras:'PARAFUSO, PORCA, ROLAMENTO, MANGUEIRA, FILTRO, CORREIA, RETENTOR, TERMINAL, REFORCO', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}
+      {prefixo:'8481', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao},
+      {prefixo:'3506', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao},
+      {prefixo:'3214', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao},
+      // Material siderúrgico (sucata, barra/tubo de aço)
+      {prefixo:'7204', conta:'1292', codHist:'', historico:TEMPLATES.generico},
+      {prefixo:'7214', conta:'1292', codHist:'', historico:TEMPLATES.generico},
+      // Uso e consumo — mantimentos/alimentação, limpeza, EPI, gás de cozinha etc.
+      {prefixo:'2711', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0201', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0207', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0401', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0402', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0403', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0405', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0406', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0407', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0701', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0702', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0703', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0704', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0705', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0706', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0709', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0803', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0804', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0805', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0806', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0807', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0808', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0810', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0811', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0813', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'0901', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'1512', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'1602', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'1604', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'1701', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'1704', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'1901', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'1905', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'2005', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'2007', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'2009', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'2103', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'2105', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'2201', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'2202', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'2204', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'2208', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'3402', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'3809', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'3923', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'6403', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'8516', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'6206', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // uniforme/EPI
+      // mais material de construção/instalações
+      {prefixo:'8205', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // ferramenta manual (colher de pedreiro)
+      {prefixo:'7317', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // pregos
+      {prefixo:'3208', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // tinta
+      {prefixo:'3917', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // tubo plástico
+      {prefixo:'2523', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // cimento
+      // mais peças/manutenção de máquinas e veículos
+      {prefixo:'9032', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // regulador de voltagem
+      {prefixo:'8544', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // fio/cabo elétrico
+      {prefixo:'8208', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // lâmina p/ máquina agrícola
+      {prefixo:'2804', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // oxigênio industrial (solda/manutenção)
+      {prefixo:'4011', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // pneu
+      {prefixo:'8479', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // outras máquinas/aparelhos mecânicos
+      // mais máquinas e implementos agrícolas (a máquina/reboque inteiro)
+      {prefixo:'8716', conta:'735', codHist:'', historico:TEMPLATES.maquinas} // reboque/carreta agrícola
     ],
     imoveis: [
       {codigo:'001', descricao:'Imóvel 001'},
@@ -261,7 +338,6 @@ function defaultState(){
     ui: { search:'', showOnlyRevisar:false, bulkCategoria:'', expandedId:null }
   };
 }
-function f(nome,cnpj,conta,codHist,historico){ return {nome,cnpj,conta,codHist,historico}; }
 
 let state = load();
 function load(){
@@ -338,7 +414,6 @@ function toast(msg){
 let uid = 1;
 
 /* ============================== CLASSIFICAÇÃO ============================== */
-function escapeRegex(s){ return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 function classifyNF(doc){
   // NCM: um documento pode misturar itens de categorias diferentes (ex: nota de
   // combustível com um filtro de brinde). Em vez de decidir pela primeira linha
@@ -365,16 +440,7 @@ function classifyNF(doc){
     for(const acc of totals.values()){ if(!best || acc.total>best.total) best = acc; }
     return {conta:best.rule.conta, codHist:best.rule.codHist, historico:best.rule.historico, origemRegra:'NCM'};
   }
-  const text = doc.produtoJoined.toUpperCase();
-  for(const rule of state.produtoRules){
-    const keys = String(rule.palavras||'').split(',').map(s=>s.trim().toUpperCase()).filter(Boolean);
-    if(keys.some(k=>k && new RegExp('(^|[^A-ZÀ-Ú0-9])'+escapeRegex(k)+'([^A-ZÀ-Ú0-9]|$)').test(text)))
-      return {conta:rule.conta, codHist:rule.codHist, historico:rule.historico, origemRegra:'Produto'};
-  }
-  // Regra por fornecedor NÃO classifica sozinha: um mesmo fornecedor pode vender
-  // itens de categorias diferentes (ex: posto que vende combustível e também peças).
-  // Sem NCM/palavra-chave batendo, o lançamento vai pra REVISAR mesmo que exista
-  // uma regra de fornecedor cadastrada.
+  // Sem NCM correspondente, vai pra REVISAR — classificação é só por NCM.
   return null;
 }
 function classifyCTe(doc){
@@ -408,6 +474,7 @@ function buildLancamentoFromDoc(doc, origem){
     tipoDoc: state.config.tipoDocPadrao,
     tipoLanc: state.config.tipoLancPadrao,
     produto: doc.produtoJoined || '',
+    ncm: doc.ncmJoined || '', // guardado no HTML (atributo data-ncm da linha), não mostrado na UI
     revisar: !match,
     origemRegra: match ? match.origemRegra : 'Nenhuma'
   };
@@ -476,6 +543,7 @@ function importDetalhamento(rows){
   for(const key in groups){
     const g = groups[key];
     g.produtoJoined = g.produtos.join(' | ');
+    g.ncmJoined = [...new Set(g.linhas.map(l=>String(l.ncm||'').trim()).filter(Boolean))].join(', ');
     const row = buildLancamentoFromDoc(g, 'NF');
     state.lancamentos.push(row);
     count++;
@@ -530,7 +598,7 @@ const NAV = [
   {id:'importar', label:'Importar & Conferir'},
   {group:true, label:'Regras de Classificação'},
   {id:'plano', label:'Plano de Contas'},
-  {id:'regras', label:'Fornecedores, NCM & Categorias'},
+  {id:'regras', label:'NCM & Categorias'},
   {id:'tabelas', label:'Tabelas de Apoio'},
   {group:true, label:'Sistema'},
   {id:'config', label:'Configuração Geral'}
@@ -641,7 +709,7 @@ function rowHtml(r){
   const ot = ORIGEM_TAG[r.origemRegra];
   const origemTagHtml = ot ? `<span class="tag ${ot.cls}" title="Classificado por: ${ot.label}">${ot.label}</span>` : '';
   const open = state.ui.expandedId===r.id;
-  const compact = `<tr class="${r.revisar?'revisar':''}" data-row="${r.id}">
+  const compact = `<tr class="${r.revisar?'revisar':''}" data-row="${r.id}" data-ncm="${esc(r.ncm||'')}">
     <td style="text-align:center"><input type="checkbox" data-sel="${r.id}" ${r.selected?'checked':''}></td>
     <td><div class="status-cell"><span class="tag ${r.origem==='NF'?'tag-nf':'tag-cte'}">${r.origem}</span>${r.revisar?'<span class="tag tag-warn">REVISAR</span>':origemTagHtml}</div></td>
     <td><select data-catsel="${r.id}">${catOptions}</select></td>
@@ -722,12 +790,12 @@ function screenRegras(){
   return `<section>
     <div class="hdr">
       <div class="kicker">Regras de classificação</div>
-      <h1>Fornecedores, NCM &amp; categorias</h1>
-      <p class="desc">O produto da nota decide antes do fornecedor — o NCM e a palavra-chave têm prioridade. O fornecedor só entra como último recurso.</p>
+      <h1>NCM &amp; categorias</h1>
+      <p class="desc">A classificação de compras é feita <strong>só pelo NCM</strong> do produto — o código é lido de cada nota e fica guardado internamente (não aparece como coluna na tabela). Sem um prefixo de NCM cadastrado que bata com a nota, ela vai pra REVISAR.</p>
     </div>
 
     <h2>Categorias rápidas</h2>
-    <p class="hint">Aparecem como atalho na coluna "Categoria rápida" da tabela de lançamentos. Use <span class="mono">{{doc}}</span>, <span class="mono">{{fornecedor}}</span> e <span class="mono">{{cnpj}}</span> no texto do histórico — são substituídos automaticamente.</p>
+    <p class="hint">Aparecem como atalho na coluna "Categoria rápida" da tabela de lançamentos, pra reclassificar manualmente. Use <span class="mono">{{doc}}</span>, <span class="mono">{{fornecedor}}</span> e <span class="mono">{{cnpj}}</span> no texto do histórico — são substituídos automaticamente.</p>
     <div class="toolbar"><span style="flex:1"></span><button class="btn btn-primary" data-add="categorias">+ Nova categoria</button></div>
     <div class="tablewrap" style="margin-bottom:36px"><table class="t">
       <thead><tr><th style="width:220px">Nome da categoria</th><th style="width:90px">Conta</th><th style="width:90px">Cód. Hist.</th><th>Texto do histórico</th><th style="width:40px"></th></tr></thead>
@@ -736,28 +804,12 @@ function screenRegras(){
 
     <div class="section-sep"></div>
 
-    <h2>Regras por fornecedor <span class="tag" style="background:rgba(255,255,255,.08);color:var(--muted);margin-left:6px">não usada na classificação automática de compras</span></h2>
-    <p class="hint">Mantida só como cadastro de referência — o mesmo fornecedor pode vender itens de categorias diferentes (ex: posto que vende combustível e também peças), então ela <strong>não</strong> classifica notas de compra sozinha. Quem decide é o NCM e a palavra-chave do produto; sem nenhum dos dois batendo, a nota vai pra REVISAR mesmo que o fornecedor esteja cadastrado aqui.</p>
-    <div class="toolbar"><span style="flex:1"></span><button class="btn btn-primary" data-add="fornecedores">+ Novo fornecedor</button></div>
-    <div class="tablewrap" style="margin-bottom:36px"><table class="t">
-      <thead><tr><th style="width:220px">Fornecedor</th><th style="width:150px">CNPJ/CPF (números)</th><th style="width:90px">Conta</th><th style="width:90px">Cód. Hist.</th><th>Texto do histórico</th><th style="width:40px"></th></tr></thead>
-      <tbody>${ruleRows('fornecedores',[{k:'nome',w:'220px'},{k:'cnpj',w:'150px'},{k:'conta',w:'90px'},{k:'codHist',w:'90px'},{k:'historico'}])}</tbody>
-    </table></div>
-
-    <h3>Regras por NCM (código fiscal do produto)</h3>
-    <p class="hint">A mais útil pra fornecedor novo — não depende de cadastrar nome de fornecedor. O prefixo é comparado com o início do NCM da linha do produto.</p>
+    <h2>Regras por NCM (código fiscal do produto)</h2>
+    <p class="hint">O prefixo é comparado com o início do NCM de cada linha de produto da nota. Um documento pode ter linhas com NCMs de categorias diferentes — nesse caso, a categoria escolhida é a que soma o maior valor entre as linhas que bateram alguma regra.</p>
     <div class="toolbar"><span style="flex:1"></span><button class="btn btn-primary" data-add="ncmRules">+ Nova regra de NCM</button></div>
-    <div class="tablewrap" style="margin-bottom:36px"><table class="t">
+    <div class="tablewrap"><table class="t">
       <thead><tr><th style="width:150px">Prefixo do NCM</th><th style="width:90px">Conta</th><th style="width:90px">Cód. Hist.</th><th>Texto do histórico</th><th style="width:40px"></th></tr></thead>
       <tbody>${ruleRows('ncmRules',[{k:'prefixo',w:'150px'},{k:'conta',w:'90px'},{k:'codHist',w:'90px'},{k:'historico'}])}</tbody>
-    </table></div>
-
-    <h3>Regras por palavra no produto</h3>
-    <p class="hint">Última tentativa antes do fornecedor. Separe várias palavras-chave por vírgula — basta uma aparecer no texto do produto.</p>
-    <div class="toolbar"><span style="flex:1"></span><button class="btn btn-primary" data-add="produtoRules">+ Nova regra de produto</button></div>
-    <div class="tablewrap"><table class="t">
-      <thead><tr><th style="width:280px">Palavras-chave</th><th style="width:90px">Conta</th><th style="width:90px">Cód. Hist.</th><th>Texto do histórico</th><th style="width:40px"></th></tr></thead>
-      <tbody>${ruleRows('produtoRules',[{k:'palavras',w:'280px'},{k:'conta',w:'90px'},{k:'codHist',w:'90px'},{k:'historico'}])}</tbody>
     </table></div>
   </section>`;
 }
@@ -905,7 +957,7 @@ function wireScreen(){
     save();
   }));
 
-  // Tabelas genéricas (planoContas, categorias, fornecedores, ncmRules, produtoRules, imoveis, ieDest, tipoDoc, tipoLanc)
+  // Tabelas genéricas (planoContas, categorias, ncmRules, imoveis, ieDest, tipoDoc, tipoLanc)
   document.querySelectorAll('[data-arr]').forEach(inp=>{
     const evt = inp.tagName==='SELECT' ? 'change' : 'change';
     inp.addEventListener(evt, ()=>{
@@ -940,7 +992,7 @@ function wireScreen(){
     bind('cfgCatFretes','categoriaFretesCTe');
 
     document.getElementById('btnBackupExport').addEventListener('click', ()=>{
-      const backup = {config:state.config, categorias:state.categorias, planoContas:state.planoContas, fornecedores:state.fornecedores, ncmRules:state.ncmRules, produtoRules:state.produtoRules, imoveis:state.imoveis, ieDest:state.ieDest, tipoDoc:state.tipoDoc, tipoLanc:state.tipoLanc};
+      const backup = {config:state.config, categorias:state.categorias, planoContas:state.planoContas, ncmRules:state.ncmRules, imoveis:state.imoveis, ieDest:state.ieDest, tipoDoc:state.tipoDoc, tipoLanc:state.tipoLanc};
       const blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob); a.download = 'backup_importador_lcdpr.json'; a.click();
@@ -969,9 +1021,7 @@ function blankRowFor(arrName){
   switch(arrName){
     case 'planoContas': return {codigo:'', nome:'', classificacao:'', tipo:'A'};
     case 'categorias': return {nome:'', conta:'', codHist:'', historico:''};
-    case 'fornecedores': return {nome:'', cnpj:'', conta:'', codHist:'', historico:''};
     case 'ncmRules': return {prefixo:'', conta:'', codHist:'', historico:''};
-    case 'produtoRules': return {palavras:'', conta:'', codHist:'', historico:''};
     case 'imoveis': return {codigo:'', descricao:''};
     case 'ieDest': return {ie:'', imovel:''};
     case 'tipoDoc': return {codigo:'', descricao:''};
