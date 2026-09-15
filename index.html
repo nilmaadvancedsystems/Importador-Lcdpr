@@ -340,19 +340,34 @@ function defaultState(){
       {prefixo:'8716', conta:'735', codHist:'', historico:TEMPLATES.maquinas} // reboque/carreta agrícola
     ],
     imoveis: [
-      {codigo:'001', descricao:'Imóvel 001'},
-      {codigo:'002', descricao:'Imóvel 002'},
-      {codigo:'007', descricao:'Imóvel 007'}
+      {codigo:'001', descricao:'FAZENDA TABATINGA'},
+      {codigo:'002', descricao:'FAZENDA SAO JOSE'},
+      {codigo:'003', descricao:'FAZENDA GAMELEIRA'},
+      {codigo:'004', descricao:'ITABERABA FAZENDA BEM POSTA'},
+      {codigo:'005', descricao:'FAZENDA ALEGRIA I'},
+      {codigo:'006', descricao:'FAZENDA BOM JESUS DO MATO VERDE I-II'},
+      {codigo:'007', descricao:'FAZENDA UNIAO'},
+      {codigo:'008', descricao:'FAZENDA CALIFORNIA'}
     ],
-    ieDest: [],
+    // Descoberto cruzando o IE_Dest do relatório de Detalhamento de Produtos com
+    // a DANFE de uma nota de cada inscrição — confirmado pelo cliente.
+    ieDest: [
+      {ie:'11288860080', imovel:'001'}, // FAZENDA TABATINGA
+      {ie:'11288860404', imovel:'007'}, // FAZENDA UNIAO
+      {ie:'11288860242', imovel:'002'}  // FAZENDA SAO JOSE
+    ],
     tipoDoc: [
-      {codigo:'1', descricao:'Nota Fiscal / CT-e'},
-      {codigo:'9', descricao:'Outros'}
+      {codigo:'1', descricao:'Nota Fiscal'},
+      {codigo:'2', descricao:'Fatura'},
+      {codigo:'3', descricao:'Recibo'},
+      {codigo:'4', descricao:'Contrato'},
+      {codigo:'5', descricao:'Folha de Pagamento'},
+      {codigo:'6', descricao:'Outros'}
     ],
     tipoLanc: [
-      {codigo:'1', descricao:'Receita'},
-      {codigo:'2', descricao:'Despesa'},
-      {codigo:'3', descricao:'Adiantamento'}
+      {codigo:'1', descricao:'Receita da Atividade Rural'},
+      {codigo:'2', descricao:'Despesas de custeios e investimentos'},
+      {codigo:'3', descricao:'Receitas de produtos entregues no ano referente a adiantamentos de recursos'}
     ],
     lancamentos: [],
     ui: { search:'', showOnlyRevisar:false, bulkCategoria:'', expandedId:null }
@@ -553,7 +568,10 @@ function classifyCTe(doc){
 function buildLancamentoFromDoc(doc, origem){
   const match = origem==='NF' ? classifyNF(doc) : classifyCTe(doc);
   const ctx = {documento:doc.documento, fornecedor:doc.fornecedor, cnpj:doc.cnpj};
-  const ieEntry = doc.ieDestRaw ? state.ieDest.find(x=>onlyDigits(x.ie)===onlyDigits(doc.ieDestRaw)) : null;
+  // IE às vezes vem com zero(s) à esquerda diferentes entre notas (ex: "0011288860080"
+  // vs "11288860080") — normaliza removendo antes de comparar.
+  const normIe = s => onlyDigits(s).replace(/^0+/, '');
+  const ieEntry = doc.ieDestRaw ? state.ieDest.find(x=>normIe(x.ie) && normIe(x.ie)===normIe(doc.ieDestRaw)) : null;
   const imovel = ieEntry ? ieEntry.imovel : state.config.imovelPadrao;
   const row = {
     id: uid++,
