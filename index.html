@@ -254,62 +254,69 @@ function defaultState(){
       // Material siderúrgico (sucata, barra/tubo de aço)
       {prefixo:'7204', conta:'1292', codHist:'', historico:TEMPLATES.generico},
       {prefixo:'7214', conta:'1292', codHist:'', historico:TEMPLATES.generico},
-      // Uso e consumo — mantimentos/alimentação, limpeza, EPI, gás de cozinha etc.
+      // Adubos e fertilizantes — capítulo 31 inteiro (esterco/adubo orgânico e
+      // mineral são sempre a mesma conta, não importa o produto específico)
+      {prefixo:'31', conta:'722', codHist:'96337', historico:TEMPLATES.adubos},
+      // Uso e consumo — capítulos inteiros de alimentação/bebidas (compra de
+      // mercado é sempre a mesma conta, qualquer que seja o mantimento)
+      {prefixo:'02', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // carnes
+      {prefixo:'04', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // laticínios/ovos
+      {prefixo:'07', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // legumes/verduras
+      {prefixo:'08', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // frutas
+      {prefixo:'09', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // café/especiarias
+      {prefixo:'15', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // óleos/gorduras alimentícias
+      {prefixo:'16', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // preparações de carne/peixe
+      {prefixo:'17', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // açúcar/doces
+      {prefixo:'19', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // pães/massas/biscoitos
+      {prefixo:'20', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // preparações de legumes/frutas
+      {prefixo:'21', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // preparações alimentícias diversas
+      {prefixo:'22', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // bebidas
+      // Uso e consumo — limpeza, higiene, EPI, gás de cozinha, escritório etc.
       {prefixo:'2711', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0201', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0207', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0401', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0402', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0403', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0405', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0406', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0407', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0701', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0702', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0703', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0704', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0705', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0706', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0709', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0803', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0804', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0805', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0806', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0807', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0808', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0810', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0811', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0813', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'0901', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'1512', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'1602', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'1604', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'1701', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'1704', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'1901', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'1905', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'2005', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'2007', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'2009', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'2103', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'2105', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'2201', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'2202', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'2204', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'2208', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'3402', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
+      {prefixo:'2828', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // hipoclorito/cloro
+      {prefixo:'3304', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // protetor solar
+      {prefixo:'3402', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // sabão/detergente
+      {prefixo:'3503', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // suplemento/colágeno
       {prefixo:'3809', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
       {prefixo:'3923', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
       {prefixo:'6403', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
-      {prefixo:'8516', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
       {prefixo:'6206', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // uniforme/EPI
+      {prefixo:'8516', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo},
       {prefixo:'8517', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // internet/roteador (ex: Starlink)
+      {prefixo:'8418', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // geladeira/freezer
+      {prefixo:'9401', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // móveis (assento)
+      {prefixo:'9403', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // móveis
+      {prefixo:'9404', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // colchão/roupa de cama
+      {prefixo:'5705', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // tapete
+      {prefixo:'6115', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // meias
+      {prefixo:'6116', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // luvas de tecido
+      {prefixo:'6302', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // roupa de cama/mesa
+      {prefixo:'4823', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // cartão/papel de escritório
+      {prefixo:'8523', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // cartão de memória
+      {prefixo:'3215', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // fita/tinta de impressão
+      {prefixo:'9603', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // vassoura/escova de limpeza
+      {prefixo:'4015', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // luva de borracha (EPI)
+      {prefixo:'6401', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // bota de borracha (EPI)
+      {prefixo:'9020', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // máscara/respirador (EPI)
+      {prefixo:'6307', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // sacaria/artefato têxtil diverso
+      {prefixo:'6203', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // vestuário/jaqueta (EPI)
+      {prefixo:'5407', conta:'812', codHist:'00044', historico:TEMPLATES.usoConsumo}, // saco/tecido sintético
       // mais material de construção/instalações
       {prefixo:'8205', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // ferramenta manual (colher de pedreiro)
       {prefixo:'7317', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // pregos
       {prefixo:'3208', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // tinta
       {prefixo:'3917', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // tubo plástico
       {prefixo:'2523', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // cimento
+      {prefixo:'7116', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // pedra/brita
+      {prefixo:'7217', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // arame (cerca)
+      {prefixo:'7306', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // tubo/perfil metálico estrutural
+      {prefixo:'8302', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // dobradiça/ferragem de porta-porteira
+      {prefixo:'3925', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // geomembrana/artefato de plástico p/ construção
+      {prefixo:'7209', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // chapa de aço laminada
+      {prefixo:'7308', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // telha/estrutura metálica
+      {prefixo:'4403', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // madeira bruta serrada
+      {prefixo:'7216', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // perfil metálico (U/T/L)
+      {prefixo:'7019', conta:'847', codHist:'00176', historico:TEMPLATES.matConstrucao}, // fibra/manta de vidro
       // mais peças/manutenção de máquinas e veículos
       {prefixo:'9032', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // regulador de voltagem
       {prefixo:'8544', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // fio/cabo elétrico
@@ -317,6 +324,16 @@ function defaultState(){
       {prefixo:'2804', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // oxigênio industrial (solda/manutenção)
       {prefixo:'4011', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // pneu
       {prefixo:'8479', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // outras máquinas/aparelhos mecânicos
+      {prefixo:'8413', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // bomba d'água/motor
+      {prefixo:'8202', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // serra/lima manual
+      {prefixo:'8203', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // lima/alicate
+      {prefixo:'8207', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // ferramenta intercambiável
+      {prefixo:'7326', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // clipe/obra de aço p/ cabo
+      {prefixo:'7415', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // parafuso/rebite de cobre
+      {prefixo:'8414', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // soprador/compressor/bomba de ar
+      {prefixo:'4004', conta:'784', codHist:'00066', historico:TEMPLATES.pecas}, // sucata/resíduo de borracha
+      // mais insumos para animais
+      {prefixo:'9018', conta:'85', codHist:'00563', historico:TEMPLATES.insumosAnimais}, // agulha/material veterinário
       // mais máquinas e implementos agrícolas (a máquina/reboque inteiro)
       {prefixo:'8716', conta:'735', codHist:'', historico:TEMPLATES.maquinas} // reboque/carreta agrícola
     ],
@@ -423,7 +440,11 @@ function classifyNF(doc){
   // principal manda, não o primeiro da lista.
   const totals = new Map(); // key: índice da regra -> {rule, total}
   for(const line of doc.linhas){
-    const ncmStr = String(line.ncm||'').trim();
+    let ncmStr = String(line.ncm||'').trim();
+    // O Excel guarda NCM como número quando a célula não está formatada como texto,
+    // o que apaga o(s) zero(s) à esquerda (ex: NCM real 01022190 vira "1022190").
+    // Sem isso, nenhuma regra de capítulo 00-09 (carnes, frutas, café, gado...) bate.
+    if(/^\d+$/.test(ncmStr)) ncmStr = ncmStr.padStart(8,'0');
     if(!ncmStr) continue;
     for(let i=0;i<state.ncmRules.length;i++){
       const rule = state.ncmRules[i];
@@ -544,7 +565,11 @@ function importDetalhamento(rows){
   for(const key in groups){
     const g = groups[key];
     g.produtoJoined = g.produtos.join(' | ');
-    g.ncmJoined = [...new Set(g.linhas.map(l=>String(l.ncm||'').trim()).filter(Boolean))].join(', ');
+    g.ncmJoined = [...new Set(g.linhas.map(l=>{
+      let n = String(l.ncm||'').trim();
+      if(/^\d+$/.test(n)) n = n.padStart(8,'0');
+      return n;
+    }).filter(Boolean))].join(', ');
     const row = buildLancamentoFromDoc(g, 'NF');
     state.lancamentos.push(row);
     count++;
