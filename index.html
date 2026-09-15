@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Importador LCDPR — Nilma Contabilidade</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <style>
 :root{
   --bg:#121010; --surface:#1c1918; --surface-2:#242020; --text:#f1ebe8;
@@ -109,7 +111,7 @@ textarea.tbl-input{resize:vertical;min-height:38px;font-family:inherit}
       <div><div class="t1">IMPORTADOR LCDPR</div><div class="t2">Nilma Contabilidade</div></div>
     </div>
     <nav class="navlist" id="navlist"></nav>
-    <div class="sidebar-foot">Salvo automaticamente neste navegador (localStorage)</div>
+    <div class="sidebar-foot" id="sidebarFoot">Conectando à nuvem…</div>
   </aside>
   <main><div class="screen" id="screen"></div></main>
 </div>
@@ -365,10 +367,85 @@ function load(){
     const parsed = JSON.parse(raw);
     const d = defaultState();
     // shallow-merge top level, keep saved arrays/objects if present
-    return Object.assign(d, parsed);
+    const merged = Object.assign(d, parsed);
+    merged.lancamentos = []; // lançamentos nunca ficam salvos — ver save()
+    return merged;
   }catch(e){ console.warn('Falha ao carregar estado salvo, usando padrão.', e); return defaultState(); }
 }
-function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function save(){
+  // Lançamentos importados NÃO ficam salvos (nem local, nem na nuvem) — são
+  // dados de trabalho, recriados a qualquer momento reimportando os relatórios
+  // do SIEG. Só regras/cadastros (que dão trabalho pra recriar) persistem.
+  const { lancamentos, ...toPersist } = state;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(toPersist));
+  scheduleCloudSync();
+}
+
+/* ============================== NUVEM (Firebase/Firestore) ==============================
+   Guardado no mesmo projeto Firebase que o app "Entregas", numa coleção própria
+   (lcdpr) que não tem nenhuma relação com as coleções do outro app. Só as
+   regras/cadastros (plano de contas, categorias, regras de NCM etc.) são
+   sincronizados — lançamentos importados não são salvos em lugar nenhum.
+   Sem login — aberto, igual ao link do GitHub Pages já é hoje. Se o Firebase
+   falhar (offline, CDN bloqueado etc.), o app continua funcionando só com o
+   localStorage, como antes. */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyD6xg7XhX8dKTKmaYup4hRX5k9XFHEkb98",
+  authDomain: "entregas-2e5e2.firebaseapp.com",
+  projectId: "entregas-2e5e2",
+  storageBucket: "entregas-2e5e2.firebasestorage.app",
+  messagingSenderId: "1009094556836",
+  appId: "1:1009094556836:web:d3b6a9283e934db064fa31"
+};
+let db = null, cloudReady = false, cloudStatus = 'connecting'; // 'connecting' | 'ok' | 'error'
+let cloudSyncTimer = null;
+try{
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.firestore();
+}catch(e){ console.warn('Firebase indisponível, usando só armazenamento local.', e); cloudStatus='error'; }
+
+const SETTINGS_FIELDS = ['config','categorias','planoContas','ncmRules','imoveis','ieDest','tipoDoc','tipoLanc'];
+
+async function bootstrapCloud(){
+  if(!db){ cloudStatus='error'; renderSidebarFoot(); return; }
+  try{
+    const settingsSnap = await db.collection('lcdpr').doc('config').get();
+    if(settingsSnap.exists){
+      const d = settingsSnap.data();
+      for(const k of SETTINGS_FIELDS) if(d[k]!==undefined) state[k] = d[k];
+    }
+    cloudReady = true; cloudStatus = 'ok';
+    const { lancamentos, ...toPersist } = state;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toPersist)); // atualiza o cache local, sem reagendar sync
+    render();
+    renderSidebarFoot();
+  }catch(e){
+    console.warn('Não foi possível conectar à nuvem — usando dados salvos neste navegador.', e);
+    cloudStatus = 'error';
+    renderSidebarFoot();
+  }
+}
+function scheduleCloudSync(){
+  if(!db) return;
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(syncSettingsToCloud, 700);
+}
+async function syncSettingsToCloud(){
+  if(!db) return;
+  try{
+    const payload = {};
+    for(const k of SETTINGS_FIELDS) payload[k] = state[k];
+    await db.collection('lcdpr').doc('config').set(payload);
+    if(cloudStatus!=='ok'){ cloudStatus='ok'; renderSidebarFoot(); }
+  }catch(e){ console.warn('Falha ao sincronizar configurações com a nuvem.', e); cloudStatus='error'; renderSidebarFoot(); }
+}
+function renderSidebarFoot(){
+  const el = document.getElementById('sidebarFoot');
+  if(!el) return;
+  el.textContent = cloudStatus==='ok' ? 'Sincronizado com a nuvem'
+    : cloudStatus==='connecting' ? 'Conectando à nuvem…'
+    : 'Sem conexão com a nuvem — salvo só neste navegador';
+}
 
 /* ============================== HELPERS ============================== */
 function onlyDigits(s){ return String(s==null?'':s).replace(/\D/g,''); }
@@ -678,11 +755,14 @@ function screenImportar(){
       <p class="desc">Envie um ou mais relatórios (.xlsx) — <strong>Detalhamento de Produtos</strong> (notas de compra) e/ou <strong>CT-e</strong> (fretes). O app reconhece o tipo de cada arquivo, agrupa por documento, descarta cancelados/notas de outros destinatários e classifica cada lançamento.</p>
     </div>
 
-    <div class="dropzone" id="dropzone">
+    ${!cloudReady ? `<div class="dropzone" style="cursor:default;opacity:.6">
+      <div class="big">Carregando dados da nuvem…</div>
+      <div class="small">Só um instante — evita perder algo que já foi importado em outro computador.</div>
+    </div>` : `<div class="dropzone" id="dropzone">
       <div class="big">Clique para escolher os arquivos, ou arraste aqui</div>
       <div class="small">.xlsx do Relatório de Detalhamento de Produtos e/ou do Relatório de CT-e (SIEG)</div>
       <input type="file" id="fileInput" accept=".xlsx,.xls" multiple style="display:none">
-    </div>
+    </div>`}
 
     <div class="stats">
       <div class="stat"><b>${total}</b><span>Lançamentos</span></div>
@@ -1058,6 +1138,8 @@ function blankRowFor(arrName){
 
 /* ============================== INIT ============================== */
 render();
+renderSidebarFoot();
+bootstrapCloud();
 </script>
 </body>
 </html>
